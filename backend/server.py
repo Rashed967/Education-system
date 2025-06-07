@@ -223,6 +223,10 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
 @app.get("/api/courses")
 async def get_courses():
     courses = await db.courses.find({"is_active": True}).to_list(None)
+    # Convert MongoDB ObjectId to string
+    for course in courses:
+        if '_id' in course:
+            course['_id'] = str(course['_id'])
     return {"courses": courses}
 
 @app.get("/api/courses/{course_id}")
