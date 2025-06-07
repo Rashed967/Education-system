@@ -235,6 +235,10 @@ async def get_course(course_id: str, current_user: dict = Depends(get_current_us
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
+    # Convert MongoDB ObjectId to string
+    if '_id' in course:
+        course['_id'] = str(course['_id'])
+    
     # Check if user is enrolled
     is_enrolled = course_id in current_user.get("enrolled_courses", [])
     
