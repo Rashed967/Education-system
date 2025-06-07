@@ -244,26 +244,28 @@ class IslamicInstituteAPITest(unittest.TestCase):
         print("✅ Admin dashboard access passed")
 
 def run_tests():
-    # Create a test suite
-    test_suite = unittest.TestSuite()
+    # Create a test instance
+    test_instance = IslamicInstituteAPITest()
     
-    # Add tests in order
-    test_suite.addTest(IslamicInstituteAPITest('test_01_health_check'))
-    test_suite.addTest(IslamicInstituteAPITest('test_02_user_registration'))
-    test_suite.addTest(IslamicInstituteAPITest('test_03_user_login'))
-    test_suite.addTest(IslamicInstituteAPITest('test_04_get_user_profile'))
-    test_suite.addTest(IslamicInstituteAPITest('test_05_get_courses'))
-    test_suite.addTest(IslamicInstituteAPITest('test_06_create_course'))
-    test_suite.addTest(IslamicInstituteAPITest('test_07_get_course_details'))
-    test_suite.addTest(IslamicInstituteAPITest('test_08_add_lesson'))
-    test_suite.addTest(IslamicInstituteAPITest('test_09_course_enrollment'))
-    test_suite.addTest(IslamicInstituteAPITest('test_10_admin_dashboard'))
+    # Run tests in sequence, allowing for dependencies
+    try:
+        test_instance.test_01_health_check()
+        test_instance.test_02_user_registration()
+        test_instance.test_03_user_login()
+        test_instance.test_04_get_user_profile()
+        test_instance.test_05_get_courses()
+        test_instance.test_06_create_course()
+        test_instance.test_07_get_course_details()
+        test_instance.test_08_add_lesson()
+        test_instance.test_09_course_enrollment()
+        test_instance.test_10_admin_dashboard()
+        
+        print("\n✅ All tests completed")
+    except Exception as e:
+        print(f"\n❌ Tests failed: {str(e)}")
     
-    # Run the tests
-    print("\n🧪 Starting API Tests for Islamic Institute Course Platform")
+    print("\n📊 Test Summary:")
     print("=" * 70)
-    runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(test_suite)
 
 if __name__ == "__main__":
     run_tests()
