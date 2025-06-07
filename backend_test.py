@@ -244,8 +244,12 @@ class IslamicInstituteAPITest(unittest.TestCase):
         print("✅ Admin dashboard access passed")
 
 def run_tests():
+    print("\n🧪 Starting API Tests for Islamic Institute Course Platform")
+    print("=" * 70)
+    
     # Create a test instance
     test_instance = IslamicInstituteAPITest()
+    test_instance.setUp()
     
     # Run tests in sequence, allowing for dependencies
     try:
