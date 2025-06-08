@@ -1435,6 +1435,606 @@ function App() {
     );
   }
 
+  // Admin Panel View
+  if (currentView === 'admin-panel') {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        {/* Admin Navigation */}
+        <nav className="bg-purple-800 shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <h1 className="text-xl font-semibold text-white">Admin Panel</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setCurrentView('dashboard')}
+                  className="text-purple-200 hover:text-white"
+                >
+                  Back to Dashboard
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          {/* Admin Panel Navigation */}
+          <div className="bg-white shadow rounded-lg mb-6">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button
+                  onClick={() => {
+                    setCurrentView('admin-dashboard');
+                    fetchAdminDashboard();
+                  }}
+                  className="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 text-center"
+                >
+                  📊 Dashboard
+                </button>
+                <button
+                  onClick={() => {
+                    setCurrentView('admin-users');
+                    fetchAdminUsers();
+                  }}
+                  className="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 text-center"
+                >
+                  👥 Users
+                </button>
+                <button
+                  onClick={() => {
+                    setCurrentView('admin-courses');
+                    fetchAdminCourses();
+                  }}
+                  className="bg-emerald-600 text-white p-4 rounded-lg hover:bg-emerald-700 text-center"
+                >
+                  📚 Courses
+                </button>
+                <button
+                  onClick={() => {
+                    setCurrentView('admin-analytics');
+                    fetchAdminAnalytics();
+                  }}
+                  className="bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700 text-center"
+                >
+                  📈 Analytics
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Welcome Message */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Admin Panel</h2>
+              <p className="text-gray-600">
+                Manage your Islamic Institute platform from here. You can manage users, courses, 
+                view analytics and monitor system performance.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin Dashboard View
+  if (currentView === 'admin-dashboard') {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        {/* Admin Navigation */}
+        <nav className="bg-purple-800 shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setCurrentView('admin-panel')}
+                  className="text-purple-200 hover:text-white mr-4"
+                >
+                  ← Back to Admin Panel
+                </button>
+                <h1 className="text-xl font-semibold text-white">Admin Dashboard</h1>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          {adminLoading ? (
+            <div className="text-center">Loading...</div>
+          ) : adminData.dashboard ? (
+            <>
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="p-5">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                          <span className="text-white text-sm">📚</span>
+                        </div>
+                      </div>
+                      <div className="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt className="text-sm font-medium text-gray-500 truncate">Total Courses</dt>
+                          <dd className="text-lg font-medium text-gray-900">{adminData.dashboard.total_courses}</dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="p-5">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                          <span className="text-white text-sm">👨‍🎓</span>
+                        </div>
+                      </div>
+                      <div className="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt className="text-sm font-medium text-gray-500 truncate">Students</dt>
+                          <dd className="text-lg font-medium text-gray-900">{adminData.dashboard.total_students}</dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="p-5">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                          <span className="text-white text-sm">👨‍🏫</span>
+                        </div>
+                      </div>
+                      <div className="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt className="text-sm font-medium text-gray-500 truncate">Instructors</dt>
+                          <dd className="text-lg font-medium text-gray-900">{adminData.dashboard.total_instructors}</dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="p-5">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center">
+                          <span className="text-white text-sm">✅</span>
+                        </div>
+                      </div>
+                      <div className="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt className="text-sm font-medium text-gray-500 truncate">Enrollments</dt>
+                          <dd className="text-lg font-medium text-gray-900">{adminData.dashboard.total_enrollments}</dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Course Performance */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Course Performance</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrollments</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {adminData.dashboard.course_stats?.slice(0, 10).map((course, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {course.title}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {course.enrollments}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              ৳{course.revenue.toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center">No data available</div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Admin Users Management View
+  if (currentView === 'admin-users') {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        {/* Admin Navigation */}
+        <nav className="bg-purple-800 shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setCurrentView('admin-panel')}
+                  className="text-purple-200 hover:text-white mr-4"
+                >
+                  ← Back to Admin Panel
+                </button>
+                <h1 className="text-xl font-semibold text-white">User Management</h1>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+              {error}
+              <button onClick={clearMessages} className="float-right text-red-400 hover:text-red-600">×</button>
+            </div>
+          )}
+          
+          {success && (
+            <div className="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded">
+              {success}
+              <button onClick={clearMessages} className="float-right text-green-400 hover:text-green-600">×</button>
+            </div>
+          )}
+
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">All Users</h3>
+              {adminLoading ? (
+                <div className="text-center">Loading users...</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrollments</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {adminData.users.map((u) => (
+                        <tr key={u.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{u.full_name}</div>
+                                <div className="text-sm text-gray-500">{u.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <select
+                              value={u.role}
+                              onChange={(e) => handleUpdateUserRole(u.id, e.target.value)}
+                              className="text-sm border border-gray-300 rounded px-2 py-1"
+                              disabled={u.id === user?.id} // Can't change own role
+                            >
+                              <option value="student">Student</option>
+                              <option value="instructor">Instructor</option>
+                              {user?.role === 'super_admin' && <option value="admin">Admin</option>}
+                            </select>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              u.is_active 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {u.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {u.total_enrollments}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            {u.id !== user?.id && (
+                              <button
+                                onClick={() => handleUpdateUserStatus(u.id, !u.is_active)}
+                                className={`px-3 py-1 rounded text-xs ${
+                                  u.is_active
+                                    ? 'bg-red-600 text-white hover:bg-red-700'
+                                    : 'bg-green-600 text-white hover:bg-green-700'
+                                }`}
+                              >
+                                {u.is_active ? 'Deactivate' : 'Activate'}
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin Courses Management View
+  if (currentView === 'admin-courses') {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        {/* Admin Navigation */}
+        <nav className="bg-purple-800 shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setCurrentView('admin-panel')}
+                  className="text-purple-200 hover:text-white mr-4"
+                >
+                  ← Back to Admin Panel
+                </button>
+                <h1 className="text-xl font-semibold text-white">Course Management</h1>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+              {error}
+              <button onClick={clearMessages} className="float-right text-red-400 hover:text-red-600">×</button>
+            </div>
+          )}
+          
+          {success && (
+            <div className="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded">
+              {success}
+              <button onClick={clearMessages} className="float-right text-green-400 hover:text-green-600">×</button>
+            </div>
+          )}
+
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">All Courses</h3>
+                <button
+                  onClick={() => setCurrentView('create-course')}
+                  className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700"
+                >
+                  Create New Course
+                </button>
+              </div>
+              
+              {adminLoading ? (
+                <div className="text-center">Loading courses...</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lessons</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrollments</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {adminData.courses.map((course) => (
+                        <tr key={course.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{course.title}</div>
+                              <div className="text-sm text-gray-500">by {course.instructor_name}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              course.course_type === 'free' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {course.course_type === 'free' ? 'Free' : `৳${course.price}`}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {course.lesson_count}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {course.total_enrollments}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ৳{course.revenue.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              course.is_active 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {course.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <button
+                              onClick={() => handleCourseView(course.id)}
+                              className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
+                            >
+                              View
+                            </button>
+                            {course.total_enrollments === 0 && (
+                              <button
+                                onClick={() => handleDeleteCourse(course.id)}
+                                className="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700"
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin Analytics View
+  if (currentView === 'admin-analytics') {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        {/* Admin Navigation */}
+        <nav className="bg-purple-800 shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setCurrentView('admin-panel')}
+                  className="text-purple-200 hover:text-white mr-4"
+                >
+                  ← Back to Admin Panel
+                </button>
+                <h1 className="text-xl font-semibold text-white">Analytics & Reports</h1>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          {adminLoading ? (
+            <div className="text-center">Loading analytics...</div>
+          ) : adminData.analytics ? (
+            <>
+              {/* Course Type Distribution */}
+              <div className="bg-white shadow rounded-lg mb-6">
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Course Distribution</h3>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600">
+                        {adminData.analytics.course_type_distribution.free_courses}
+                      </div>
+                      <div className="text-sm text-gray-500">Free Courses</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600">
+                        {adminData.analytics.course_type_distribution.paid_courses}
+                      </div>
+                      <div className="text-sm text-gray-500">Paid Courses</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Monthly Enrollment Trends */}
+              <div className="bg-white shadow rounded-lg mb-6">
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Enrollment Trends (Last 6 Months)</h3>
+                  <div className="space-y-3">
+                    {adminData.analytics.monthly_trends.map((month, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">
+                          {month.month} {month.year}
+                        </span>
+                        <div className="flex items-center">
+                          <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{
+                                width: `${Math.max((month.enrollments / Math.max(...adminData.analytics.monthly_trends.map(m => m.enrollments), 1)) * 100, 5)}%`
+                              }}
+                            ></div>
+                          </div>
+                          <span className="text-sm text-gray-600">{month.enrollments}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Performing Courses */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Top Performing Courses</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrollments</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {adminData.analytics.top_courses.map((course, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {course.title}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                course.type === 'free' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {course.type}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {course.enrollments}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              ৳{course.revenue.toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center">No analytics data available</div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return null;
 }
 
