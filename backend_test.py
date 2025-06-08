@@ -4,7 +4,10 @@ import random
 import string
 import time
 import os
+import json
 from dotenv import load_dotenv
+import pymongo
+import hashlib
 
 # Load environment variables from .env file
 load_dotenv('/app/frontend/.env')
@@ -20,6 +23,11 @@ class IslamicInstituteAPITest(unittest.TestCase):
         self.admin_data = None
         self.free_course_id = None
         self.paid_course_id = None
+        
+        # MongoDB connection
+        mongo_url = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
+        self.mongo_client = pymongo.MongoClient(mongo_url)
+        self.db = self.mongo_client.islamic_institute
         
         # Generate random user data for testing
         random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
@@ -65,6 +73,10 @@ class IslamicInstituteAPITest(unittest.TestCase):
             "duration": 10,
             "is_preview": True
         }
+        
+    def hash_password(self, password):
+        """Hash password using SHA-256"""
+        return hashlib.sha256(password.encode()).hexdigest()
 
     def test_01_health_check(self):
         """Test the health check endpoint"""
