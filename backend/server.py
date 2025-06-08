@@ -395,11 +395,252 @@ async def admin_dashboard(current_user: dict = Depends(get_current_user)):
     total_courses = await db.courses.count_documents({"is_active": True})
     total_students = await db.users.count_documents({"role": "student", "is_active": True})
     total_enrollments = await db.enrollments.count_documents({"payment_status": "completed"})
+    total_instructors = await db.users.count_documents({"role": "instructor", "is_active": True})
+    
+    # Get recent enrollments
+    recent_enrollments = await db.enrollments.find(
+        {"payment_status": "completed"}
+    ).sort("enrolled_at", -1).limit(10).to_list(None)
+    
+    # Get course performance data
+    course_stats = []
+    courses = await db.courses.find({"is_active": True}).to_list(None)
+    for course in courses:
+        enrollments = await db.enrollments.count_documents({
+            "course_id": course["id"], 
+            "payment_status": "completed"
+        })
+        course_stats.append({
+            "course_id": course["id"],
+            "title": course["title"],
+            "enrollments": enrollments,
+            "revenue": course.get("price", 0) * enrollments if course["course_type"] == "paid" else 0
+        })
     
     return {
         "total_courses": total_courses,
         "total_students": total_students,
-        "total_enrollments": total_enrollments
+        "total_instructors": total_instructors,
+        "total_enrollments": total_enrollments,
+        "recent_enrollments": recent_enrollments,
+        "course_stats": course_stats
+    }
+
+@app.get("/api/admin/users")
+async def get_all_users(current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    users = await db.users.find({}, {"password": 0}).to_list(None)
+    # Convert MongoDB ObjectId to string and add enrollment info
+    for user in users:
+        if '_id' in user:
+            user['_id'] = str(user['_id'])
+        # Count enrollments for each user
+        user["total_enrollments"] = await db.enrollments.count_documents({
+            "user_id": user["id"], 
+            "payment_status": "completed"
+        })
+    
+    return {"users": users}
+
+@app.put("/api/admin/users/{user_id}/role")
+async def update_user_role(user_id: str, role_data: dict, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    new_role = role_data.get("role")
+    if new_role not in ["student", "instructor", "admin"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    
+    # Prevent non-super-admin from creating other admins
+    if new_role == "admin" and current_user["role"] != "super_admin":
+        raise HTTPException(status_code=403, detail="Only super admin can create admin users")
+    
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"role": new_role}}
+    )
+    
+    return {"message": f"User role updated to {new_role}"}
+
+@app.put("/api/admin/users/{user_id}/status")
+async def update_user_status(user_id: str, status_data: dict, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    is_active = status_data.get("is_active")
+    if not isinstance(is_active, bool):
+        raise HTTPException(status_code=400, detail="is_active must be a boolean")
+    
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Prevent admin from deactivating themselves
+    if user_id == current_user["id"]:
+        raise HTTPException(status_code=400, detail="Cannot change your own status")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_active": is_active}}
+    )
+    
+    return {"message": f"User {'activated' if is_active else 'deactivated'} successfully"}
+
+@app.get("/api/admin/courses")
+async def get_all_courses_admin(current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    courses = await db.courses.find({}).to_list(None)
+    # Add enrollment and revenue data
+    for course in courses:
+        if '_id' in course:
+            course['_id'] = str(course['_id'])
+        
+        # Count enrollments
+        enrollments = await db.enrollments.count_documents({
+            "course_id": course["id"], 
+            "payment_status": "completed"
+        })
+        course["total_enrollments"] = enrollments
+        course["revenue"] = course.get("price", 0) * enrollments if course["course_type"] == "paid" else 0
+        course["lesson_count"] = len(course.get("lessons", []))
+    
+    return {"courses": courses}
+
+@app.delete("/api/admin/courses/{course_id}")
+async def delete_course(course_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    course = await db.courses.find_one({"id": course_id})
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    # Check if course has enrollments
+    enrollments = await db.enrollments.count_documents({"course_id": course_id})
+    if enrollments > 0:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot delete course with {enrollments} enrollments. Deactivate instead."
+        )
+    
+    # Delete the course
+    await db.courses.delete_one({"id": course_id})
+    
+    return {"message": "Course deleted successfully"}
+
+@app.put("/api/admin/courses/{course_id}")
+async def update_course_admin(course_id: str, course_data: CourseCreate, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    course = await db.courses.find_one({"id": course_id})
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    # Update course data
+    update_data = course_data.dict()
+    await db.courses.update_one(
+        {"id": course_id},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Course updated successfully"}
+
+@app.get("/api/admin/enrollments")
+async def get_all_enrollments(current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    enrollments = await db.enrollments.find({}).sort("enrolled_at", -1).to_list(None)
+    
+    # Enrich with user and course data
+    for enrollment in enrollments:
+        if '_id' in enrollment:
+            enrollment['_id'] = str(enrollment['_id'])
+        
+        # Get user info
+        user = await db.users.find_one({"id": enrollment["user_id"]}, {"password": 0})
+        if user:
+            enrollment["user_name"] = user["full_name"]
+            enrollment["user_email"] = user["email"]
+        
+        # Get course info
+        course = await db.courses.find_one({"id": enrollment["course_id"]})
+        if course:
+            enrollment["course_title"] = course["title"]
+            enrollment["course_price"] = course.get("price", 0)
+    
+    return {"enrollments": enrollments}
+
+@app.get("/api/admin/analytics")
+async def get_analytics(current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Monthly enrollment trends (last 6 months)
+    from datetime import datetime, timedelta
+    import calendar
+    
+    monthly_data = []
+    for i in range(6):
+        # Calculate start and end of month
+        target_date = datetime.now() - timedelta(days=30 * i)
+        start_of_month = target_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if target_date.month == 12:
+            end_of_month = start_of_month.replace(year=start_of_month.year + 1, month=1) - timedelta(seconds=1)
+        else:
+            end_of_month = start_of_month.replace(month=start_of_month.month + 1) - timedelta(seconds=1)
+        
+        # Count enrollments in this month
+        enrollments = await db.enrollments.count_documents({
+            "enrolled_at": {"$gte": start_of_month, "$lte": end_of_month},
+            "payment_status": "completed"
+        })
+        
+        monthly_data.append({
+            "month": calendar.month_name[start_of_month.month],
+            "year": start_of_month.year,
+            "enrollments": enrollments
+        })
+    
+    # Revenue by course type
+    free_courses = await db.courses.count_documents({"course_type": "free", "is_active": True})
+    paid_courses = await db.courses.count_documents({"course_type": "paid", "is_active": True})
+    
+    # Top performing courses
+    courses = await db.courses.find({"is_active": True}).to_list(None)
+    course_performance = []
+    for course in courses:
+        enrollments = await db.enrollments.count_documents({
+            "course_id": course["id"], 
+            "payment_status": "completed"
+        })
+        revenue = course.get("price", 0) * enrollments if course["course_type"] == "paid" else 0
+        course_performance.append({
+            "title": course["title"],
+            "enrollments": enrollments,
+            "revenue": revenue,
+            "type": course["course_type"]
+        })
+    
+    # Sort by enrollments
+    course_performance.sort(key=lambda x: x["enrollments"], reverse=True)
+    
+    return {
+        "monthly_trends": list(reversed(monthly_data)),  # Oldest to newest
+        "course_type_distribution": {
+            "free_courses": free_courses,
+            "paid_courses": paid_courses
+        },
+        "top_courses": course_performance[:10]
     }
 
 if __name__ == "__main__":
