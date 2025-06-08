@@ -159,17 +159,17 @@ backend:
           agent: "testing"
           comment: "Tested both free and paid course enrollment. Free course enrollment works correctly, and paid course enrollment creates a pending status as expected. The payment integration is not implemented yet, but the API returns the correct information for the frontend to handle payment."
 
-  - task: "Admin Dashboard API"
+  - task: "Lesson Management API - Update/Delete"
     implemented: true
     working: true
     file: "server.py"
     stuck_count: 0
-    priority: "medium"
+    priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "main"
-          comment: "Basic admin stats API implemented"
+          comment: "Added PUT and DELETE endpoints for lesson management with proper permissions"
 
 frontend:
   - task: "User Authentication UI"
