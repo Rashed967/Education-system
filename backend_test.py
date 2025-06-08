@@ -23,6 +23,7 @@ class IslamicInstituteAPITest(unittest.TestCase):
         self.admin_data = None
         self.free_course_id = None
         self.paid_course_id = None
+        self.lesson_ids = []  # To store lesson IDs for update/delete tests
         
         # MongoDB connection
         mongo_url = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
@@ -65,12 +66,33 @@ class IslamicInstituteAPITest(unittest.TestCase):
             "thumbnail_url": "https://example.com/thumbnail.jpg"
         }
         
+        # Test lesson data - YouTube video
         self.test_lesson = {
             "title": "Test Lesson",
             "description": "This is a test lesson",
             "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
             "video_type": "youtube",
             "duration": 10,
+            "is_preview": True
+        }
+        
+        # Test lesson data - Vimeo video
+        self.test_vimeo_lesson = {
+            "title": "Vimeo Test Lesson",
+            "description": "This is a test lesson with Vimeo video",
+            "video_url": "https://vimeo.com/123456789",
+            "video_type": "vimeo",
+            "duration": 15,
+            "is_preview": False
+        }
+        
+        # Updated lesson data for testing updates
+        self.updated_lesson = {
+            "title": "Updated Lesson Title",
+            "description": "This lesson has been updated for testing",
+            "video_url": "https://www.youtube.com/watch?v=abcdefghijk",
+            "video_type": "youtube",
+            "duration": 20,
             "is_preview": True
         }
         
