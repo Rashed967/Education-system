@@ -855,6 +855,14 @@ function App() {
                     Create Course
                   </button>
                 )}
+                {user && ['admin', 'super_admin'].includes(user.role) && (
+                  <button
+                    onClick={() => setCurrentView('admin-panel')}
+                    className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
+                  >
+                    Admin Panel
+                  </button>
+                )}
                 <button
                   onClick={() => setCurrentView('home')}
                   className="text-gray-500 hover:text-gray-700"
