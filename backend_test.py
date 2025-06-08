@@ -169,119 +169,235 @@ class IslamicInstituteAPITest(unittest.TestCase):
         self.assertIn("courses", data)
         print(f"✅ Course listing passed - Found {len(data['courses'])} courses")
 
-    def test_06_create_course(self):
-        """Test course creation (admin only)"""
-        print("\n🔍 Testing course creation...")
-        if not self.token:
-            self.test_03_user_login()
+    def test_07_create_free_course(self):
+        """Test free course creation (admin only)"""
+        print("\n🔍 Testing free course creation...")
+        if not self.admin_token:
+            self.test_03_create_admin_user()
             
-        # Note: This might fail if the test user doesn't have admin/instructor privileges
+        # Use admin token for course creation
         response = requests.post(
             f"{self.base_url}/courses",
-            headers={"Authorization": f"Bearer {self.token}"},
-            json=self.test_course
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+            json=self.test_free_course
         )
         
         # Check if user has permission
         if response.status_code == 403:
-            print("⚠️ Course creation skipped - User doesn't have admin/instructor privileges")
+            print("⚠️ Free course creation skipped - User doesn't have admin/instructor privileges")
             return
             
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIn("course_id", data)
-        self.course_id = data["course_id"]
-        print(f"✅ Course creation passed - Created course ID: {self.course_id}")
-
-    def test_07_get_course_details(self):
-        """Test getting course details"""
-        print("\n🔍 Testing course details retrieval...")
-        if not self.token:
-            self.test_03_user_login()
+        self.free_course_id = data["course_id"]
+        print(f"✅ Free course creation passed - Created course ID: {self.free_course_id}")
+        
+    def test_08_create_paid_course(self):
+        """Test paid course creation (admin only)"""
+        print("\n🔍 Testing paid course creation...")
+        if not self.admin_token:
+            self.test_03_create_admin_user()
             
-        # If we don't have a course ID from creation, try to get one from the course list
-        if not self.course_id:
+        # Use admin token for course creation
+        response = requests.post(
+            f"{self.base_url}/courses",
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+            json=self.test_paid_course
+        )
+        
+        # Check if user has permission
+        if response.status_code == 403:
+            print("⚠️ Paid course creation skipped - User doesn't have admin/instructor privileges")
+            return
+            
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("course_id", data)
+        self.paid_course_id = data["course_id"]
+        print(f"✅ Paid course creation passed - Created course ID: {self.paid_course_id}")
+
+    def test_09_get_free_course_details(self):
+        """Test getting free course details"""
+        print("\n🔍 Testing free course details retrieval...")
+        if not self.token:
+            self.test_04_user_login()
+            
+        # If we don't have a free course ID from creation, try to get one from the course list
+        if not self.free_course_id:
             response = requests.get(f"{self.base_url}/courses")
             courses = response.json().get("courses", [])
-            if courses:
-                self.course_id = courses[0]["id"]
-            else:
-                print("⚠️ Course details retrieval skipped - No courses available")
+            for course in courses:
+                if course.get("course_type") == "free":
+                    self.free_course_id = course["id"]
+                    break
+                    
+            if not self.free_course_id:
+                print("⚠️ Free course details retrieval skipped - No free courses available")
                 return
                 
         response = requests.get(
-            f"{self.base_url}/courses/{self.course_id}",
+            f"{self.base_url}/courses/{self.free_course_id}",
             headers={"Authorization": f"Bearer {self.token}"}
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["id"], self.course_id)
-        print(f"✅ Course details retrieval passed - Course: {data['title']}")
-
-    def test_08_add_lesson(self):
-        """Test adding a lesson to a course"""
-        print("\n🔍 Testing lesson addition...")
+        self.assertEqual(data["id"], self.free_course_id)
+        self.assertEqual(data["course_type"], "free")
+        print(f"✅ Free course details retrieval passed - Course: {data['title']}")
+        
+    def test_10_get_paid_course_details(self):
+        """Test getting paid course details"""
+        print("\n🔍 Testing paid course details retrieval...")
         if not self.token:
-            self.test_03_user_login()
+            self.test_04_user_login()
             
-        if not self.course_id:
-            self.test_07_get_course_details()
-            if not self.course_id:
-                print("⚠️ Lesson addition skipped - No course ID available")
+        # If we don't have a paid course ID from creation, try to get one from the course list
+        if not self.paid_course_id:
+            response = requests.get(f"{self.base_url}/courses")
+            courses = response.json().get("courses", [])
+            for course in courses:
+                if course.get("course_type") == "paid":
+                    self.paid_course_id = course["id"]
+                    break
+                    
+            if not self.paid_course_id:
+                print("⚠️ Paid course details retrieval skipped - No paid courses available")
+                return
+                
+        response = requests.get(
+            f"{self.base_url}/courses/{self.paid_course_id}",
+            headers={"Authorization": f"Bearer {self.token}"}
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["id"], self.paid_course_id)
+        self.assertEqual(data["course_type"], "paid")
+        print(f"✅ Paid course details retrieval passed - Course: {data['title']}")
+
+    def test_11_add_lesson_to_free_course(self):
+        """Test adding a lesson to a free course"""
+        print("\n🔍 Testing lesson addition to free course...")
+        if not self.admin_token:
+            self.test_03_create_admin_user()
+            
+        if not self.free_course_id:
+            self.test_07_create_free_course()
+            if not self.free_course_id:
+                print("⚠️ Lesson addition to free course skipped - No free course ID available")
                 return
                 
         response = requests.post(
-            f"{self.base_url}/courses/{self.course_id}/lessons",
-            headers={"Authorization": f"Bearer {self.token}"},
+            f"{self.base_url}/courses/{self.free_course_id}/lessons",
+            headers={"Authorization": f"Bearer {self.admin_token}"},
             json=self.test_lesson
         )
         
         # Check if user has permission
         if response.status_code == 403:
-            print("⚠️ Lesson addition skipped - User doesn't have admin/instructor privileges")
+            print("⚠️ Lesson addition to free course skipped - User doesn't have admin/instructor privileges")
             return
             
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIn("lesson_id", data)
-        print(f"✅ Lesson addition passed - Added lesson ID: {data['lesson_id']}")
-
-    def test_09_course_enrollment(self):
-        """Test course enrollment"""
-        print("\n🔍 Testing course enrollment...")
-        if not self.token:
-            self.test_03_user_login()
+        print(f"✅ Lesson addition to free course passed - Added lesson ID: {data['lesson_id']}")
+        
+    def test_12_add_lesson_to_paid_course(self):
+        """Test adding a lesson to a paid course"""
+        print("\n🔍 Testing lesson addition to paid course...")
+        if not self.admin_token:
+            self.test_03_create_admin_user()
             
-        if not self.course_id:
-            self.test_07_get_course_details()
-            if not self.course_id:
-                print("⚠️ Course enrollment skipped - No course ID available")
+        if not self.paid_course_id:
+            self.test_08_create_paid_course()
+            if not self.paid_course_id:
+                print("⚠️ Lesson addition to paid course skipped - No paid course ID available")
                 return
                 
         response = requests.post(
-            f"{self.base_url}/courses/{self.course_id}/enroll",
+            f"{self.base_url}/courses/{self.paid_course_id}/lessons",
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+            json=self.test_lesson
+        )
+        
+        # Check if user has permission
+        if response.status_code == 403:
+            print("⚠️ Lesson addition to paid course skipped - User doesn't have admin/instructor privileges")
+            return
+            
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("lesson_id", data)
+        print(f"✅ Lesson addition to paid course passed - Added lesson ID: {data['lesson_id']}")
+
+    def test_13_enroll_in_free_course(self):
+        """Test enrollment in a free course"""
+        print("\n🔍 Testing enrollment in free course...")
+        if not self.token:
+            self.test_04_user_login()
+            
+        if not self.free_course_id:
+            self.test_09_get_free_course_details()
+            if not self.free_course_id:
+                print("⚠️ Free course enrollment skipped - No free course ID available")
+                return
+                
+        response = requests.post(
+            f"{self.base_url}/courses/{self.free_course_id}/enroll",
             headers={"Authorization": f"Bearer {self.token}"}
         )
         
         # If already enrolled, this will return 400
         if response.status_code == 400 and "Already enrolled" in response.json().get("detail", ""):
-            print("⚠️ Already enrolled in this course")
+            print("⚠️ Already enrolled in this free course")
             return
             
         self.assertIn(response.status_code, [200, 201])
         data = response.json()
         self.assertIn("message", data)
-        print(f"✅ Course enrollment passed - {data['message']}")
+        self.assertEqual(data.get("enrollment_status"), "completed")
+        print(f"✅ Free course enrollment passed - {data['message']}")
+        
+    def test_14_enroll_in_paid_course(self):
+        """Test enrollment in a paid course"""
+        print("\n🔍 Testing enrollment in paid course...")
+        if not self.token:
+            self.test_04_user_login()
+            
+        if not self.paid_course_id:
+            self.test_10_get_paid_course_details()
+            if not self.paid_course_id:
+                print("⚠️ Paid course enrollment skipped - No paid course ID available")
+                return
+                
+        response = requests.post(
+            f"{self.base_url}/courses/{self.paid_course_id}/enroll",
+            headers={"Authorization": f"Bearer {self.token}"}
+        )
+        
+        # If already enrolled, this will return 400
+        if response.status_code == 400 and "Already enrolled" in response.json().get("detail", ""):
+            print("⚠️ Already enrolled in this paid course")
+            return
+            
+        self.assertIn(response.status_code, [200, 201])
+        data = response.json()
+        self.assertIn("message", data)
+        self.assertTrue(data.get("payment_required", False))
+        self.assertIn("enrollment_id", data)
+        self.assertIn("amount", data)
+        print(f"✅ Paid course enrollment passed - {data['message']}")
 
-    def test_10_admin_dashboard(self):
+    def test_15_admin_dashboard(self):
         """Test admin dashboard access"""
         print("\n🔍 Testing admin dashboard access...")
-        if not self.token:
-            self.test_03_user_login()
+        if not self.admin_token:
+            self.test_03_create_admin_user()
             
         response = requests.get(
             f"{self.base_url}/admin/dashboard",
-            headers={"Authorization": f"Bearer {self.token}"}
+            headers={"Authorization": f"Bearer {self.admin_token}"}
         )
         
         # Check if user has admin privileges
