@@ -422,16 +422,30 @@ def run_tests():
     
     # Run tests in sequence, allowing for dependencies
     try:
+        # Health check
         test_instance.test_01_health_check()
+        
+        # User authentication tests
         test_instance.test_02_user_registration()
-        test_instance.test_03_user_login()
-        test_instance.test_04_get_user_profile()
-        test_instance.test_05_get_courses()
-        test_instance.test_06_create_course()
-        test_instance.test_07_get_course_details()
-        test_instance.test_08_add_lesson()
-        test_instance.test_09_course_enrollment()
-        test_instance.test_10_admin_dashboard()
+        test_instance.test_03_create_admin_user()
+        test_instance.test_04_user_login()
+        test_instance.test_05_get_user_profile()
+        
+        # Course management tests
+        test_instance.test_06_get_courses()
+        test_instance.test_07_create_free_course()
+        test_instance.test_08_create_paid_course()
+        test_instance.test_09_get_free_course_details()
+        test_instance.test_10_get_paid_course_details()
+        test_instance.test_11_add_lesson_to_free_course()
+        test_instance.test_12_add_lesson_to_paid_course()
+        
+        # Enrollment tests
+        test_instance.test_13_enroll_in_free_course()
+        test_instance.test_14_enroll_in_paid_course()
+        
+        # Admin dashboard test
+        test_instance.test_15_admin_dashboard()
         
         print("\n✅ All tests completed")
     except Exception as e:
@@ -439,6 +453,21 @@ def run_tests():
     
     print("\n📊 Test Summary:")
     print("=" * 70)
+    print("1. Health Check: Tested /api/health endpoint")
+    print("2. User Authentication:")
+    print("   - Tested user registration with valid data")
+    print("   - Tested user login with registered credentials")
+    print("   - Tested protected /api/auth/me endpoint with valid token")
+    print("3. Course Management:")
+    print("   - Tested creating a free course with admin credentials")
+    print("   - Tested creating a paid course with admin credentials")
+    print("   - Tested fetching all courses (/api/courses)")
+    print("   - Tested fetching specific course details")
+    print("4. Enrollment System:")
+    print("   - Tested enrolling in a free course")
+    print("   - Tested enrolling in a paid course (creates pending enrollment)")
+    print("5. Admin Dashboard:")
+    print("   - Tested /api/admin/dashboard with admin credentials")
 
 if __name__ == "__main__":
     run_tests()
