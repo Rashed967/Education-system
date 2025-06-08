@@ -143,15 +143,18 @@ backend:
 
   - task: "Enrollment System"
     implemented: true
-    working: "partial"
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "partial"
           agent: "main"
           comment: "Free enrollment works, paid course enrollment creates pending status but no payment integration"
+        - working: true
+          agent: "testing"
+          comment: "Tested both free and paid course enrollment. Free course enrollment works correctly, and paid course enrollment creates a pending status as expected. The payment integration is not implemented yet, but the API returns the correct information for the frontend to handle payment."
 
   - task: "Admin Dashboard API"
     implemented: true
