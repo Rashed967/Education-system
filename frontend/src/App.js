@@ -248,6 +248,80 @@ function App() {
     }
   };
 
+  const handleAddLesson = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('token');
+      const formData = { ...lessonForm };
+      if (formData.duration) {
+        formData.duration = parseInt(formData.duration);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/courses/${selectedCourse.id}/lessons`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSuccess('Lesson added successfully!');
+        setLessonForm({
+          title: '',
+          description: '',
+          video_url: '',
+          video_type: 'youtube',
+          duration: '',
+          is_preview: false
+        });
+        setShowAddLesson(false);
+        // Refresh course data to show new lesson
+        handleCourseView(selectedCourse.id);
+      } else {
+        setError(data.detail || 'Lesson creation failed');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId) => {
+    if (!window.confirm('Are you sure you want to delete this lesson?')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/courses/${selectedCourse.id}/lessons/${lessonId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        setSuccess('Lesson deleted successfully!');
+        // Refresh course data
+        handleCourseView(selectedCourse.id);
+      } else {
+        const data = await response.json();
+        setError(data.detail || 'Lesson deletion failed');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getVideoEmbedUrl = (url, type) => {
     if (type === 'youtube') {
       const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
