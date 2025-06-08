@@ -41,6 +41,11 @@ function App() {
     is_preview: false
   });
 
+  // Add lesson management state
+  const [showAddLesson, setShowAddLesson] = useState(false);
+  const [editingLessonId, setEditingLessonId] = useState(null);
+  const [showLessonManagement, setShowLessonManagement] = useState(false);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
