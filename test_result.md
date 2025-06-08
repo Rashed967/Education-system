@@ -171,6 +171,18 @@ backend:
           agent: "main"
           comment: "Added PUT and DELETE endpoints for lesson management with proper permissions"
 
+  - task: "Admin Dashboard API"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Basic admin stats API implemented"
+
 frontend:
   - task: "User Authentication UI"
     implemented: true
