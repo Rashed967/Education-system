@@ -260,19 +260,33 @@ function App() {
         formData.duration = parseInt(formData.duration);
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/courses/${selectedCourse.id}/lessons`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      });
+      let response;
+      if (editingLessonId) {
+        // Update existing lesson
+        response = await fetch(`${API_BASE_URL}/api/courses/${selectedCourse.id}/lessons/${editingLessonId}`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        });
+      } else {
+        // Add new lesson
+        response = await fetch(`${API_BASE_URL}/api/courses/${selectedCourse.id}/lessons`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        });
+      }
       
       const data = await response.json();
       
       if (response.ok) {
-        setSuccess('Lesson added successfully!');
+        setSuccess(editingLessonId ? 'Lesson updated successfully!' : 'Lesson added successfully!');
         setLessonForm({
           title: '',
           description: '',
@@ -282,10 +296,11 @@ function App() {
           is_preview: false
         });
         setShowAddLesson(false);
-        // Refresh course data to show new lesson
+        setEditingLessonId(null);
+        // Refresh course data to show updated/new lesson
         handleCourseView(selectedCourse.id);
       } else {
-        setError(data.detail || 'Lesson creation failed');
+        setError(data.detail || 'Lesson operation failed');
       }
     } catch (error) {
       setError('Network error. Please try again.');
