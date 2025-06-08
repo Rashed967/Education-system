@@ -939,10 +939,12 @@ function App() {
                 )}
               </div>
 
-              {/* Add Lesson Form */}
+              {/* Add/Edit Lesson Form */}
               {showAddLesson && (
                 <div className="mb-6 bg-gray-50 p-4 rounded-lg border">
-                  <h4 className="text-md font-semibold text-gray-900 mb-4">Add New Lesson</h4>
+                  <h4 className="text-md font-semibold text-gray-900 mb-4">
+                    {editingLessonId ? 'Edit Lesson' : 'Add New Lesson'}
+                  </h4>
                   <form onSubmit={handleAddLesson} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
