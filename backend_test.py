@@ -71,8 +71,7 @@ class IslamicInstituteAPITest(unittest.TestCase):
             "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
             "video_type": "youtube",
             "duration": 10,
-            "is_preview": True,
-            "order": 1  # Adding the order field
+            "is_preview": True
         }
         
     def hash_password(self, password):
