@@ -46,6 +46,16 @@ function App() {
   const [editingLessonId, setEditingLessonId] = useState(null);
   const [showLessonManagement, setShowLessonManagement] = useState(false);
 
+  // Admin panel state
+  const [adminData, setAdminData] = useState({
+    users: [],
+    courses: [],
+    enrollments: [],
+    analytics: null,
+    dashboard: null
+  });
+  const [adminLoading, setAdminLoading] = useState(false);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
