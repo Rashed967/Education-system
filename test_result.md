@@ -250,3 +250,5 @@ test_plan:
 agent_communication:
     - agent: "main"
       message: "Initial system analysis complete. Core functionality implemented but payment integration and lesson management UI missing. Ready for backend testing and feature completion."
+    - agent: "testing"
+      message: "Backend testing completed. Most APIs are working correctly. The enrollment system works as expected for both free and paid courses. There is a minor issue with the lesson addition API due to a validation error with the 'order' field. The Lesson model requires an 'order' field, but the LessonCreate model doesn't include it. The server tries to set the order after creating the lesson, which causes a validation error. This should be fixed in the server code."
