@@ -121,12 +121,35 @@ class IslamicInstituteAPITest(unittest.TestCase):
         self.admin_token = data["access_token"]
         self.admin_data = data["user"]
         
-        # We need to manually update the user role to admin in the database
-        # This would typically be done by a super admin in a real application
-        # For testing purposes, we'll assume this step is handled externally
-        print(f"✅ Admin user created: {self.admin_data['email']}")
-        print("⚠️ Note: In a real application, you would need to manually update the user role to admin")
+        # Update the user role to admin directly in the database
+        try:
+            result = self.db.users.update_one(
+                {"email": self.admin_user["email"]},
+                {"$set": {"role": "admin"}}
+            )
+            if result.modified_count > 0:
+                print(f"✅ User role updated to admin for: {self.admin_data['email']}")
+            else:
+                print(f"⚠️ Failed to update user role to admin for: {self.admin_data['email']}")
+        except Exception as e:
+            print(f"⚠️ Error updating user role: {str(e)}")
         
+        # Login again to get a token with admin privileges
+        response = requests.post(
+            f"{self.base_url}/auth/login",
+            json={
+                "email": self.admin_user["email"],
+                "password": self.admin_user["password"]
+            }
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            self.admin_token = data["access_token"]
+            print(f"✅ Admin user created and logged in: {self.admin_data['email']}")
+        else:
+            print(f"⚠️ Admin login failed: {response.text}")
+            
         # For testing purposes, we'll use the regular user token if admin token is not available
         if not self.admin_token:
             self.admin_token = self.token
