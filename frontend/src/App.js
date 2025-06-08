@@ -347,6 +347,164 @@ function App() {
     }
   };
 
+  // Admin functions
+  const fetchAdminDashboard = async () => {
+    setAdminLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAdminData(prev => ({ ...prev, dashboard: data }));
+      }
+    } catch (error) {
+      console.error('Error fetching admin dashboard:', error);
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const fetchAdminUsers = async () => {
+    setAdminLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAdminData(prev => ({ ...prev, users: data.users }));
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const fetchAdminCourses = async () => {
+    setAdminLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/admin/courses`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAdminData(prev => ({ ...prev, courses: data.courses }));
+      }
+    } catch (error) {
+      console.error('Error fetching admin courses:', error);
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const fetchAdminAnalytics = async () => {
+    setAdminLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/admin/analytics`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAdminData(prev => ({ ...prev, analytics: data }));
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleUpdateUserRole = async (userId, newRole) => {
+    if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ role: newRole })
+      });
+      
+      if (response.ok) {
+        setSuccess('User role updated successfully!');
+        fetchAdminUsers(); // Refresh users list
+      } else {
+        const data = await response.json();
+        setError(data.detail || 'Failed to update user role');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    }
+  };
+
+  const handleUpdateUserStatus = async (userId, isActive) => {
+    const action = isActive ? 'activate' : 'deactivate';
+    if (!window.confirm(`Are you sure you want to ${action} this user?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/status`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ is_active: isActive })
+      });
+      
+      if (response.ok) {
+        setSuccess(`User ${action}d successfully!`);
+        fetchAdminUsers(); // Refresh users list
+      } else {
+        const data = await response.json();
+        setError(data.detail || `Failed to ${action} user`);
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    }
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    if (!window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/admin/courses/${courseId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        setSuccess('Course deleted successfully!');
+        fetchAdminCourses(); // Refresh courses list
+      } else {
+        const data = await response.json();
+        setError(data.detail || 'Failed to delete course');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
+    }
+  };
+
   const getVideoEmbedUrl = (url, type) => {
     if (type === 'youtube') {
       const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
