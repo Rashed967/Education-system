@@ -220,17 +220,17 @@ frontend:
           agent: "main"
           comment: "User dashboard showing enrolled courses and stats"
 
-  - task: "Lesson Addition UI"
-    implemented: false
-    working: "NA"
+  - task: "Lesson Management UI"
+    implemented: true
+    working: true
     file: "App.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
-        - working: "NA"
+        - working: true
           agent: "main"
-          comment: "Backend API exists but no frontend interface for adding lessons to courses"
+          comment: "Complete lesson management interface with add, edit, delete functionality for admin/instructors"
 
 metadata:
   created_by: "main_agent"
