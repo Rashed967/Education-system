@@ -271,9 +271,10 @@ async def add_lesson_to_course(course_id: str, lesson_data: LessonCreate, curren
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    # Create lesson
-    lesson = Lesson(**lesson_data.dict())
-    lesson.order = len(course.get("lessons", [])) + 1
+    # Create lesson with order field
+    lesson_dict = lesson_data.dict()
+    lesson_dict["order"] = len(course.get("lessons", [])) + 1
+    lesson = Lesson(**lesson_dict)
     
     # Update course with new lesson
     await db.courses.update_one(
