@@ -904,7 +904,123 @@ function App() {
             </div>
 
             <div className="px-6 py-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Content</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Course Content</h3>
+                {user && ['admin', 'super_admin', 'instructor'].includes(user.role) && (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setShowAddLesson(true)}
+                      className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 text-sm"
+                    >
+                      Add Lesson
+                    </button>
+                    <button
+                      onClick={() => setShowLessonManagement(!showLessonManagement)}
+                      className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 text-sm"
+                    >
+                      {showLessonManagement ? 'Hide Management' : 'Manage Lessons'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Add Lesson Form */}
+              {showAddLesson && (
+                <div className="mb-6 bg-gray-50 p-4 rounded-lg border">
+                  <h4 className="text-md font-semibold text-gray-900 mb-4">Add New Lesson</h4>
+                  <form onSubmit={handleAddLesson} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Lesson Title</label>
+                        <input
+                          type="text"
+                          required
+                          value={lessonForm.title}
+                          onChange={(e) => setLessonForm({...lessonForm, title: e.target.value})}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Duration (minutes)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={lessonForm.duration}
+                          onChange={(e) => setLessonForm({...lessonForm, duration: e.target.value})}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Description</label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={lessonForm.description}
+                        onChange={(e) => setLessonForm({...lessonForm, description: e.target.value})}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Video URL</label>
+                        <input
+                          type="url"
+                          required
+                          value={lessonForm.video_url}
+                          onChange={(e) => setLessonForm({...lessonForm, video_url: e.target.value})}
+                          placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Video Type</label>
+                        <select
+                          value={lessonForm.video_type}
+                          onChange={(e) => setLessonForm({...lessonForm, video_type: e.target.value})}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                        >
+                          <option value="youtube">YouTube</option>
+                          <option value="vimeo">Vimeo</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="is_preview"
+                        checked={lessonForm.is_preview}
+                        onChange={(e) => setLessonForm({...lessonForm, is_preview: e.target.checked})}
+                        className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="is_preview" className="ml-2 block text-sm text-gray-700">
+                        Make this a preview lesson (free for everyone)
+                      </label>
+                    </div>
+                    
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddLesson(false)}
+                        className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 disabled:opacity-50"
+                      >
+                        {loading ? 'Adding...' : 'Add Lesson'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
               {selectedCourse.lessons && selectedCourse.lessons.length > 0 ? (
                 <div className="space-y-4">
                   {selectedCourse.lessons.map((lesson, index) => (
@@ -921,6 +1037,33 @@ function App() {
                           )}
                           {lesson.duration && (
                             <span className="text-sm text-gray-500">{lesson.duration} min</span>
+                          )}
+                          {showLessonManagement && user && ['admin', 'super_admin', 'instructor'].includes(user.role) && (
+                            <div className="flex space-x-1">
+                              <button
+                                onClick={() => {
+                                  setEditingLessonId(lesson.id);
+                                  setLessonForm({
+                                    title: lesson.title,
+                                    description: lesson.description,
+                                    video_url: lesson.video_url,
+                                    video_type: lesson.video_type,
+                                    duration: lesson.duration?.toString() || '',
+                                    is_preview: lesson.is_preview
+                                  });
+                                  setShowAddLesson(true);
+                                }}
+                                className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteLesson(lesson.id)}
+                                className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
