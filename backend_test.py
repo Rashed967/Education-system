@@ -6,7 +6,7 @@ import time
 
 class IslamicInstituteAPITest(unittest.TestCase):
     def setUp(self):
-        self.base_url = "https://85c16a9b-6909-4247-b731-02b00cdbc3e6.preview.emergentagent.com/api"
+        self.base_url = "https://7a9c659d-b44f-4b2a-afa4-cbfbea37ef14.preview.emergentagent.com/api"
         self.token = None
         self.user_data = None
         self.course_id = None
