@@ -284,6 +284,59 @@ async def add_lesson_to_course(course_id: str, lesson_data: LessonCreate, curren
     
     return {"message": "Lesson added successfully", "lesson_id": lesson.id}
 
+@app.delete("/api/courses/{course_id}/lessons/{lesson_id}")
+async def delete_lesson_from_course(course_id: str, lesson_id: str, current_user: dict = Depends(get_current_user)):
+    # Check permissions
+    if current_user["role"] not in ["admin", "super_admin", "instructor"]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    course = await db.courses.find_one({"id": course_id})
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    # Check if lesson exists
+    lesson_exists = any(lesson["id"] == lesson_id for lesson in course.get("lessons", []))
+    if not lesson_exists:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Remove lesson from course
+    await db.courses.update_one(
+        {"id": course_id},
+        {"$pull": {"lessons": {"id": lesson_id}}}
+    )
+    
+    return {"message": "Lesson deleted successfully"}
+
+@app.put("/api/courses/{course_id}/lessons/{lesson_id}")
+async def update_lesson_in_course(course_id: str, lesson_id: str, lesson_data: LessonCreate, current_user: dict = Depends(get_current_user)):
+    # Check permissions
+    if current_user["role"] not in ["admin", "super_admin", "instructor"]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    course = await db.courses.find_one({"id": course_id})
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    # Find the lesson and update it
+    lessons = course.get("lessons", [])
+    lesson_index = next((i for i, lesson in enumerate(lessons) if lesson["id"] == lesson_id), None)
+    
+    if lesson_index is None:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Update lesson data while preserving id and order
+    updated_lesson = lesson_data.dict()
+    updated_lesson["id"] = lesson_id
+    updated_lesson["order"] = lessons[lesson_index]["order"]
+    
+    # Update the lesson in the array
+    await db.courses.update_one(
+        {"id": course_id, "lessons.id": lesson_id},
+        {"$set": {"lessons.$": updated_lesson}}
+    )
+    
+    return {"message": "Lesson updated successfully"}
+
 @app.post("/api/courses/{course_id}/enroll")
 async def enroll_in_course(course_id: str, current_user: dict = Depends(get_current_user)):
     course = await db.courses.find_one({"id": course_id, "is_active": True})
