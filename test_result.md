@@ -240,7 +240,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Backend API Testing"
+    - "Lesson Management API Fix"
     - "Payment Integration Planning"
     - "Missing Features Identification"
   stuck_tasks: []
