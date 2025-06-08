@@ -3,13 +3,23 @@ import unittest
 import random
 import string
 import time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv('/app/frontend/.env')
 
 class IslamicInstituteAPITest(unittest.TestCase):
     def setUp(self):
-        self.base_url = "https://7a9c659d-b44f-4b2a-afa4-cbfbea37ef14.preview.emergentagent.com/api"
+        # Get backend URL from environment variable
+        backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://7a9c659d-b44f-4b2a-afa4-cbfbea37ef14.preview.emergentagent.com')
+        self.base_url = f"{backend_url}/api"
         self.token = None
+        self.admin_token = None
         self.user_data = None
-        self.course_id = None
+        self.admin_data = None
+        self.free_course_id = None
+        self.paid_course_id = None
         
         # Generate random user data for testing
         random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
@@ -20,12 +30,30 @@ class IslamicInstituteAPITest(unittest.TestCase):
             "phone": f"+1234567{random.randint(1000, 9999)}"
         }
         
-        # Test course data
-        self.test_course = {
-            "title": f"Test Course {random_suffix}",
-            "description": "This is a test course created for API testing",
+        # Admin user for testing admin operations
+        self.admin_user = {
+            "full_name": f"Admin User {random_suffix}",
+            "email": f"adminuser{random_suffix}@example.com",
+            "password": "AdminPassword123!",
+            "phone": f"+1234567{random.randint(1000, 9999)}"
+        }
+        
+        # Test free course data
+        self.test_free_course = {
+            "title": f"Free Test Course {random_suffix}",
+            "description": "This is a free test course created for API testing",
             "instructor_name": "Test Instructor",
             "course_type": "free",
+            "thumbnail_url": "https://example.com/thumbnail.jpg"
+        }
+        
+        # Test paid course data
+        self.test_paid_course = {
+            "title": f"Paid Test Course {random_suffix}",
+            "description": "This is a paid test course created for API testing",
+            "instructor_name": "Test Instructor",
+            "course_type": "paid",
+            "price": 999.99,  # Price in BDT
             "thumbnail_url": "https://example.com/thumbnail.jpg"
         }
         
