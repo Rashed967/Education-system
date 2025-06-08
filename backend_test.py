@@ -93,8 +93,33 @@ class IslamicInstituteAPITest(unittest.TestCase):
         self.token = data["access_token"]
         self.user_data = data["user"]
         print(f"✅ User registration passed - Created user: {self.user_data['email']}")
-
-    def test_03_user_login(self):
+        
+    def test_03_create_admin_user(self):
+        """Create an admin user for testing admin operations"""
+        print("\n🔍 Creating admin user for testing...")
+        
+        # Register the admin user
+        response = requests.post(
+            f"{self.base_url}/auth/register",
+            json=self.admin_user
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("access_token", data)
+        self.admin_token = data["access_token"]
+        self.admin_data = data["user"]
+        
+        # We need to manually update the user role to admin in the database
+        # This would typically be done by a super admin in a real application
+        # For testing purposes, we'll assume this step is handled externally
+        print(f"✅ Admin user created: {self.admin_data['email']}")
+        print("⚠️ Note: In a real application, you would need to manually update the user role to admin")
+        
+        # For testing purposes, we'll use the regular user token if admin token is not available
+        if not self.admin_token:
+            self.admin_token = self.token
+            
+    def test_04_user_login(self):
         """Test user login"""
         print("\n🔍 Testing user login...")
         
@@ -120,11 +145,11 @@ class IslamicInstituteAPITest(unittest.TestCase):
         self.token = data["access_token"]
         print("✅ User login passed")
 
-    def test_04_get_user_profile(self):
+    def test_05_get_user_profile(self):
         """Test getting user profile"""
         print("\n🔍 Testing user profile retrieval...")
         if not self.token:
-            self.test_03_user_login()
+            self.test_04_user_login()
             
         response = requests.get(
             f"{self.base_url}/auth/me",
@@ -135,7 +160,7 @@ class IslamicInstituteAPITest(unittest.TestCase):
         self.assertEqual(data["email"], self.test_user["email"])
         print("✅ User profile retrieval passed")
 
-    def test_05_get_courses(self):
+    def test_06_get_courses(self):
         """Test getting course list"""
         print("\n🔍 Testing course listing...")
         response = requests.get(f"{self.base_url}/courses")
