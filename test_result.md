@@ -131,7 +131,7 @@ backend:
 
   - task: "Lesson Management API"
     implemented: true
-    working: true
+    working: "partial"
     file: "server.py"
     stuck_count: 0
     priority: "high"
@@ -140,6 +140,9 @@ backend:
         - working: true
           agent: "main"
           comment: "API endpoint for adding lessons to courses with video URL support"
+        - working: "partial"
+          agent: "testing"
+          comment: "The lesson addition API has a validation issue. The Lesson model requires an 'order' field, but the LessonCreate model doesn't include it. The server tries to set the order after creating the lesson, which causes a validation error. This is a minor issue that should be fixed in the server code."
 
   - task: "Enrollment System"
     implemented: true
