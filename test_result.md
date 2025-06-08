@@ -240,19 +240,6 @@ metadata:
 
 test_plan:
   current_focus:
-  - task: "Admin Dashboard API"
-    implemented: true
-    working: true
-    file: "server.py"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
-    status_history:
-        - working: true
-          agent: "main"
-          comment: "Basic admin stats API implemented"
-
-  current_focus:
     - "Lesson Management UI Testing"
     - "Advanced Admin Panel Development"
     - "Student Progress Tracking Implementation"
